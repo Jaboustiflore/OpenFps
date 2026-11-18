@@ -1,0 +1,22 @@
+{
+  "id": "apex_legends",
+  "name": "Apex Legends",
+  "status": "verified-paths",
+  "paths": ["%USERPROFILE%\\Saved Games\\Respawn\\Apex\\local\\videoconfig.txt"],
+  "separator": "vdf",
+  "only_existing": true,
+  "read_only_after": true,
+  "settings": [
+    {"key": "setting.mat_vsync_mode", "label": "VSync (0 = désactivé)", "formula": "0"},
+    {"key": "setting.volumetric_lighting", "label": "Éclairage volumétrique", "formula": "0"},
+    {"key": "setting.csm_enabled", "label": "Ombres du soleil", "formula": "0 if gpu < 60 else 1"},
+    {"key": "setting.mat_antialias_mode", "label": "Anti-aliasing (0 = désactivé)", "formula": "0"},
+    {"key": "setting.cl_gib_allow", "label": "Effets de démembrement", "formula": "0"},
+    {"key": "setting.mat_forceaniso", "label": "Filtrage anisotrope", "formula": "1 if gpu < 50 else 4"}
+  ],
+  "tips": [
+    "Le fichier est passé en lecture seule : sinon Apex écrase ces réglages au lancement suivant.",
+    "Pour changer un réglage vidéo dans le jeu, clique d'abord sur Restaurer l'original, puis réoptimise ensuite.",
+    "Lance Apex une fois avant d'optimiser pour que videoconfig.txt existe."
+  ]
+}

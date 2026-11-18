@@ -1,0 +1,31 @@
+{
+  "id": "minecraft_java",
+  "name": "Minecraft (Java Edition)",
+  "status": "stable",
+  "paths": ["%APPDATA%\\.minecraft\\options.txt"],
+  "separator": ":",
+  "only_existing": true,
+  "settings": [
+    {"key": "renderDistance", "label": "Distance d'affichage",
+     "formula": "clamp(round((4 + gpu * 0.10) / max(res_ratio, 1) ** 0.5), 4, 16)"},
+    {"key": "simulationDistance", "label": "Distance de simulation",
+     "formula": "clamp(round(5 + cpu * 0.05), 5, 12)"},
+    {"key": "maxFps", "label": "FPS max (260 = illimité)", "formula": "260"},
+    {"key": "enableVsync", "label": "VSync", "formula": "false"},
+    {"key": "graphicsMode", "label": "Graphismes (0 rapide, 1 détaillé)",
+     "formula": "0 if gpu < 75 else 1"},
+    {"key": "particles", "label": "Particules (0 toutes, 2 minimales)",
+     "formula": "2 if gpu < 70 else 1"},
+    {"key": "entityShadows", "label": "Ombres des entités", "formula": "gpu >= 80"},
+    {"key": "ao", "label": "Éclairage doux", "formula": "gpu >= 70"},
+    {"key": "biomeBlendRadius", "label": "Fondu des biomes", "formula": "0 if gpu < 70 else 1"},
+    {"key": "mipmapLevels", "label": "Mipmaps", "formula": "0 if gpu < 50 else 2"},
+    {"key": "entityDistanceScaling", "label": "Distance des entités",
+     "formula": "round(0.5 + gpu / 100 * 0.5, 1)"},
+    {"key": "renderClouds", "label": "Nuages", "formula": "'false' if gpu < 70 else 'fast'"}
+  ],
+  "tips": [
+    "Mémoire Java conseillée : -Xmx{{ram_alloc}}G (environ 40 % de la RAM, entre 2 et 8 Go).",
+    "Pour aller plus loin, installe Sodium (Fabric) : souvent 2 à 3 fois plus de FPS."
+  ]
+}

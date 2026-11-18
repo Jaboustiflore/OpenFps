@@ -1,0 +1,91 @@
+{
+  "id": "ue",
+  "status": "auto",
+  "discover": {
+    "glob": [
+      "%LOCALAPPDATA%\\*\\Saved\\Config\\*\\GameUserSettings.ini",
+      "%LOCALAPPDATA%\\*\\Saved\\Config\\*\\*\\GameUserSettings.ini"
+    ],
+    "name_regex": "Local/([^/]+)/Saved/",
+    "name_format": "{name} (Unreal Engine, auto)",
+    "name_map": {
+      "FortniteGame": "Fortnite",
+      "VALORANT": "Valorant"
+    }
+  },
+  "separator": "=",
+  "only_existing": true,
+  "settings": [
+    {
+      "key": "ResolutionScaleValue",
+      "section": "/Script/Engine.GameUserSettings",
+      "label": "Échelle de rendu (%)",
+      "formula": "100 if gpu >= 40 else clamp(round(60 + gpu), 60, 100)"
+    },
+    {
+      "key": "FrameRateLimit",
+      "section": "/Script/Engine.GameUserSettings",
+      "label": "Limite de FPS (0 = illimité)",
+      "formula": "0"
+    },
+    {
+      "key": "bUseVSync",
+      "section": "/Script/Engine.GameUserSettings",
+      "label": "VSync",
+      "formula": "'False'"
+    },
+    {
+      "key": "sg.ViewDistanceQuality",
+      "section": "ScalabilityGroups",
+      "label": "Distance d'affichage (0-4)",
+      "formula": "min(3, int(gpu / 28))"
+    },
+    {
+      "key": "sg.ShadowQuality",
+      "section": "ScalabilityGroups",
+      "label": "Ombres (0-4)",
+      "formula": "0 if gpu < 60 else (1 if gpu < 85 else 2)"
+    },
+    {
+      "key": "sg.PostProcessQuality",
+      "section": "ScalabilityGroups",
+      "label": "Post-traitement (0-4)",
+      "formula": "0 if gpu < 70 else 1"
+    },
+    {
+      "key": "sg.TextureQuality",
+      "section": "ScalabilityGroups",
+      "label": "Textures (0-4, selon la VRAM)",
+      "formula": "clamp(int(vram_gb / 2) - 1, 0, 3)"
+    },
+    {
+      "key": "sg.EffectsQuality",
+      "section": "ScalabilityGroups",
+      "label": "Effets (0-4)",
+      "formula": "0 if gpu < 60 else 1"
+    },
+    {
+      "key": "sg.FoliageQuality",
+      "section": "ScalabilityGroups",
+      "label": "Végétation (0-4)",
+      "formula": "0 if gpu < 60 else 1"
+    },
+    {
+      "key": "sg.ShadingQuality",
+      "section": "ScalabilityGroups",
+      "label": "Ombrage (0-4)",
+      "formula": "0 if gpu < 50 else 1"
+    },
+    {
+      "key": "sg.AntiAliasingQuality",
+      "section": "ScalabilityGroups",
+      "label": "Anti-aliasing (0-4)",
+      "formula": "1 if gpu < 60 else 2"
+    }
+  ],
+  "tips": [
+    "Jeu détecté automatiquement (Unreal Engine) : seules les clés déjà présentes dans le fichier sont modifiées.",
+    "Certains jeux réécrivent ce fichier à la fermeture ou ignorent ces clés : relance l'optimisation si besoin.",
+    "Fortnite et Valorant : les réglages peuvent aussi être synchronisés par le serveur ; si le jeu les remet à zéro, relance l'optimisation après la fermeture du jeu."
+  ]
+}
