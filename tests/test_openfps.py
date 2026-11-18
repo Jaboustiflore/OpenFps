@@ -227,3 +227,46 @@ class SteamPathTests(unittest.TestCase):
             self.assertEqual(cs2.find_all(), [f])
         finally:
             covers.steam_roots = orig
+
+
+class CodTests(unittest.TestCase):
+    SAMPLE = ("// Display\r\n"
+              "// Percentage of window resolution that the 3D scene renders at.\r\n"
+              "ResolutionMultiplier@0;64786;30730 = 67 // 0 to 200\r\n"
+              "// Synchronizes framerate\r\n"
+              "VSync@0;55075;7764 = 100% // one of disabled, 100%, 50%, 33%, 25%\r\n"
+              "// Shadow Quality Level\r\n"
+              "ShadowQuality@0;3981;58629 = Very_High // one of Very_Low, Low, Medium, High, Very_High\r\n"
+              "// Volumetric quality\r\n"
+              "VolumetricQuality@0;4276;43096 = QUALITY_VERYHIGH // one of QUALITY_LOW\r\n"
+              "VolumetricQuality@1;4276;58629 = QUALITY_VERYHIGH // one of QUALITY_LOW\r\n"
+              "Monitor@0;2059;35888 = VG248\r\n")
+
+    def test_cod_format_keeps_ids_comments_and_crlf(self):
+        g = next(x for x in catalog.load_catalog() if x.id == "cod_mw4")
+        tmp = tempfile.mkdtemp()
+        f = os.path.join(tmp, "s.1.0.cod26.txt")
+        with open(f, "w", newline="") as fh:
+            fh.write(self.SAMPLE)
+        env = scoring.variables(hw("NVIDIA GeForce GTX 1650", 8, 16, vram=4))
+        catalog.apply(g, f, env)
+        out = open(f, newline="").read()
+        self.assertIn("ResolutionMultiplier@0;64786;30730 = 76 // 0 to 200\r\n", out)
+        self.assertIn("VSync@0;55075;7764 = disabled // one of disabled", out)
+        self.assertIn("ShadowQuality@0;3981;58629 = Low // one of", out)
+        self.assertIn("VolumetricQuality@0;4276;43096 = QUALITY_LOW", out)
+        self.assertIn("VolumetricQuality@1;4276;58629 = QUALITY_LOW", out)  # @0 et @1 distincts
+        self.assertIn("Monitor@0;2059;35888 = VG248\r\n", out)  # non concerné : intact
+        self.assertEqual(out.count("\r\n"), self.SAMPLE.count("\r\n"))
+        self.assertTrue(catalog.restore(f))
+        self.assertEqual(open(f, newline="").read(), self.SAMPLE)
+
+    def test_cod_path_uses_localappdata(self):
+        tmp = tempfile.mkdtemp()
+        d = os.path.join(tmp, "Activision", "Call of Duty", "players")
+        os.makedirs(d)
+        f = os.path.join(d, "s.1.0.cod26.txt")
+        open(f, "w").write(self.SAMPLE)
+        os.environ["LOCALAPPDATA"] = tmp
+        g = next(x for x in catalog.load_catalog() if x.id == "cod_mw4")
+        self.assertEqual(g.find_all(), [f])

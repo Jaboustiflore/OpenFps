@@ -46,6 +46,7 @@ Crée un fichier dans `openfps/games/` (ou dans `%APPDATA%\OpenFPS\games\` sans 
 
 - `separator` : `:`, `=` ou `" "` (format `commande valeur`).
 - `only_existing: true` ne modifie que les clés déjà présentes (recommandé : évite de casser une version différente du jeu).
+- `separator: "cod"` pour le format Call of Duty (`Nom@0;id;id = valeur // plage`) : les identifiants et commentaires sont conservés.
 - `separator: "vdf"` pour les fichiers `"clé"  "valeur"` (Source, Apex, CS2).
 - `read_only_after: true` verrouille le fichier si le jeu l'écrase à chaque lancement (Restaurer le déverrouille).
 - `section` (optionnel, par réglage) pour les fichiers `.ini` avec `[sections]`.
@@ -58,6 +59,7 @@ Les formats non textuels ou binaires (JSON imbriqué, registre, XML) ne sont pas
 | Jeu | État |
 |---|---|
 | Minecraft (Java Edition) | Clés vérifiées sur `options.txt` |
+| Call of Duty : Modern Warfare 4 | Fichier texte `s.1.0.cod26.txt` lu sur ton PC, format `Nom@0;id;id = valeur // plage` |
 | Apex Legends | `videoconfig.txt` (fichier passé en lecture seule après optimisation) |
 | Counter-Strike 2 | `cs2_video.txt`, **expérimental** (Steam Cloud peut réécrire le fichier) |
 | Fortnite, Valorant | Détectés via Unreal Engine (voir ci-dessous) |
@@ -65,7 +67,7 @@ Les formats non textuels ou binaires (JSON imbriqué, registre, XML) ne sont pas
 
 Les jeux Unreal Engine détectés apparaissent d'eux-mêmes en haut de la liste (réglages `sg.*Quality`, échelle de rendu, limite de FPS, VSync). Seules les clés déjà présentes dans le fichier sont modifiées.
 
-**Call of Duty (Warzone, MW, BO6)** n'est pas encore pris en charge : ses réglages sont dans des fichiers `.cst` dont le format n'est pas documenté. Une contribution avec un fichier d'exemple est la bienvenue.
+**Call of Duty : Modern Warfare 4** (fichier `s.1.0.cod26.txt` dans `%LOCALAPPDATA%\Activision\Call of Duty\players`) est pris en charge via le format `cod`. Les autres titres Call of Duty (autres numéros `codXX`) peuvent être ajoutés de la même façon : envoie un exemple de leur fichier `s.1.0.codXX.txt`.
 
 Les autres moteurs (Unity, Source, etc.) stockent leurs réglages différemment : chaque jeu ou famille de jeux demande un fichier JSON vérifié avant d'être ajouté. Un fichier JSON peut aussi servir de modèle de découverte (clé `discover`, voir `unreal_engine_auto.json`) pour couvrir toute une famille de jeux d'un coup.
 

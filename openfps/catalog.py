@@ -190,7 +190,9 @@ def compute(game: Game, env: dict) -> list:
 
 def _split(line: str, sep: str):
     """Retourne (clé, valeur) si la ligne est de la forme clé<sep>valeur."""
-    if sep == "vdf":  # "clé"  "valeur" (Source, Apex, CS2)
+    if sep == "cod":  # Nom@0;123;456 = valeur // plage (Call of Duty)
+        m = re.match(r"^\s*([A-Za-z0-9_]+@\d+);\d+;\d+\s*=\s*(.*?)\s*(?://.*)?$", line)
+    elif sep == "vdf":  # "clé"  "valeur" (Source, Apex, CS2)
         m = re.match(r'^\s*"([^"]+)"\s+"([^"]*)"', line)
     elif sep == " ":
         m = re.match(r"^\s*(\S+)\s+(.*?)\s*$", line)
@@ -254,7 +256,10 @@ def apply(game: Game, path: str, env: dict) -> list:
         if k is not None and (section, k) in by_key:
             c = by_key[(section, k)]
             sep = game.separator
-            if sep == "vdf":
+            if sep == "cod":
+                line = re.sub(r"^(\s*[A-Za-z0-9_]+@\d+;\d+;\d+\s*=\s*)(.*?)(\s*//.*)?$",
+                              lambda m: m.group(1) + c.new + (m.group(3) or ""), line)
+            elif sep == "vdf":
                 line = f'"{k}"\t\t"{c.new}"'
             else:
                 line = f"{k}{sep}{c.new}" if sep != " " else f"{k} {c.new}"
