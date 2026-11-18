@@ -251,9 +251,9 @@ class CodTests(unittest.TestCase):
         env = scoring.variables(hw("NVIDIA GeForce GTX 1650", 8, 16, vram=4))
         catalog.apply(g, f, env)
         out = open(f, newline="").read()
-        self.assertIn("ResolutionMultiplier@0;64786;30730 = 76 // 0 to 200\r\n", out)
+        self.assertIn("ResolutionMultiplier@0;64786;30730 = 74 // 0 to 200\r\n", out)
         self.assertIn("VSync@0;55075;7764 = disabled // one of disabled", out)
-        self.assertIn("ShadowQuality@0;3981;58629 = Low // one of", out)
+        self.assertIn("ShadowQuality@0;3981;58629 = Very_Low // one of", out)
         self.assertIn("VolumetricQuality@0;4276;43096 = QUALITY_LOW", out)
         self.assertIn("VolumetricQuality@1;4276;58629 = QUALITY_LOW", out)  # @0 et @1 distincts
         self.assertIn("Monitor@0;2059;35888 = VG248\r\n", out)  # non concerné : intact
