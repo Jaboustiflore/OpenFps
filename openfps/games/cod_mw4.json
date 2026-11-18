@@ -24,8 +24,8 @@
     {
       "key": "NvidiaReflex@0",
       "label": "NVIDIA Reflex (faible latence)",
-      "formula": "'Enabled'",
-      "why": "Réduit la latence entre ta souris et l'écran (coût en FPS quasi nul)."
+      "formula": "'Enabled + boost' if gpu < 85 else 'Enabled'",
+      "why": "Réduit la latence ; le mode « boost » garde le GPU à fréquence maximale, ce qui lisse les FPS sur les cartes moyennes."
     },
     {
       "key": "ResolutionMultiplier@0",
@@ -35,9 +35,9 @@
     },
     {
       "key": "TextureQuality@0",
-      "label": "Textures (0 = meilleures, 3 = plus basses)",
-      "formula": "0 if vram_gb >= 6 else (1 if vram_gb >= 4 else 2)",
-      "why": "Les textures coûtent peu de FPS tant que la VRAM suffit. Gardées au maximum si ta carte a assez de mémoire."
+      "label": "Textures (valeur du fichier, 0 à 3)",
+      "formula": "3 if gpu < 75 else (1 if vram_gb < 8 else 0)",
+      "why": "Moins de textures lourdes = moins de VRAM utilisée et moins de saccades de chargement sur les cartes moyennes (réglage choisi à la main par un joueur RTX 2070 et jugé plus fluide)."
     },
     {
       "key": "ShadowQuality@0",
@@ -78,8 +78,8 @@
     {
       "key": "SSRQuality@0",
       "label": "Réflexions écran",
-      "formula": "'Off'",
-      "why": "Réflexions calculées à l'écran : très coûteuses, désactivées."
+      "formula": "'Off' if gpu < 55 else 'Low'",
+      "why": "Réflexions à l'écran : Low garde un rendu agréable pour un coût modéré ; Off sur les cartes faibles."
     },
     {
       "key": "AmbientLightingQuality@0",
@@ -180,8 +180,8 @@
     {
       "key": "TextureFilter@0",
       "label": "Filtrage anisotrope",
-      "formula": "'aniso 4x' if gpu < 75 else 'aniso 8x'",
-      "why": "Netteté des textures vues de biais : 4x est quasi identique à 16x pour bien moins de coût."
+      "formula": "'aniso 2x' if gpu < 75 else 'aniso 8x'",
+      "why": "Netteté des textures vues de biais : 2x est suffisant sur une carte moyenne et coûte moins qu'un filtre plus élevé."
     },
     {
       "key": "DLSSModelUI@0",
@@ -192,7 +192,7 @@
     {
       "key": "DLSSPerfModeMP@0",
       "label": "Mode DLSS",
-      "formula": "'Maximum Performance' if gpu < 45 else ('Balanced' if gpu < 85 else 'Maximum Quality')",
+      "formula": "'Ultra Performance' if gpu < 75 else ('Maximum Performance' if gpu < 88 else 'Balanced')",
       "why": "Mode DLSS : plus il privilégie la performance, plus les FPS montent (image légèrement moins fine). Sans effet si DLSS est désactivé."
     }
   ],
