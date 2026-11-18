@@ -231,7 +231,7 @@ class App(tk.Tk):
 
         tree_box = tk.Frame(right, bg=BG)
         tree_box.pack(fill="both", expand=True)
-        tree = ttk.Treeview(tree_box, columns=cols, show="headings", height=10)
+        tree = ttk.Treeview(tree_box, columns=cols, show="headings", height=8)
         for col, wd in zip(cols, (270, 110, 110)):
             tree.heading(col, text=col)
             tree.column(col, width=wd)
@@ -301,6 +301,15 @@ class App(tk.Tk):
         btn_res.configure(command=restore)
         btn_browse.configure(command=browse)
         refresh()
+
+        # dimensionne la fenêtre selon son contenu pour que les boutons ne soient jamais coupés
+        win.update_idletasks()
+        w = max(900, win.winfo_reqwidth())
+        h = max(640, win.winfo_reqheight() + 24)
+        h = min(h, max(480, self.winfo_screenheight() - 80))
+        x = max(0, self.winfo_rootx() + (self.winfo_width() - w) // 2)
+        y = max(0, min(self.winfo_rooty(), self.winfo_screenheight() - h - 40))
+        win.geometry(f"{w}x{h}+{x}+{y}")
 
 
 def run():
