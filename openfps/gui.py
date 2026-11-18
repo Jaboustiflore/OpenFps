@@ -257,6 +257,16 @@ class App(tk.Tk):
         btn_res.pack(side="left", padx=6)
         btn_browse.pack(side="left")
 
+        state = {"running": False}
+
+        def watch():
+            """Surveille le lancement/la fermeture du jeu et met la fiche à jour."""
+            if not win.winfo_exists():
+                return
+            if g.process and catalog.is_running(g.process) != state["running"]:
+                refresh()
+            win.after(2000, watch)
+
         def refresh():
             for w in poster_holder.winfo_children():
                 w.destroy()
@@ -267,10 +277,12 @@ class App(tk.Tk):
             path = g.find_config()
             path_lbl.config(text=path or "Fichier de config introuvable : lance le jeu une "
                                          "fois, ou utilise « Choisir le fichier... ».")
-            ready = bool(path) and self.env is not None
+            running = catalog.is_running(g.process)
+            state["running"] = running
+            ready = bool(path) and self.env is not None and not running
             btn_opt.state(["!disabled"] if ready else ["disabled"])
             has_backup = bool(path) and os.path.exists(path + catalog.BACKUP_SUFFIX)
-            btn_res.state(["!disabled"] if has_backup else ["disabled"])
+            btn_res.state(["!disabled"] if has_backup and not running else ["disabled"])
             if self.env is None:
                 tips.config(text="Détection de ta configuration en cours...")
                 win.after(800, refresh)
@@ -283,7 +295,11 @@ class App(tk.Tk):
                         why_map[iid] = ch.why
                 except OSError as exc:
                     status.config(text=f"Lecture impossible : {exc}", fg="#ff6b6b")
-            if path and not tree.get_children():
+            if running:
+                status.config(text=f"{g.name} est lancé : ferme le jeu pour pouvoir optimiser "
+                                   "(il réécrirait sinon ses réglages à la fermeture).",
+                              fg="#ffb347")
+            elif path and not tree.get_children():
                 status.config(text="Déjà optimisé pour ta configuration.", fg="#5ee38b")
 
         def optimize():
@@ -315,6 +331,8 @@ class App(tk.Tk):
         refresh()
 
         # dimensionne la fenêtre selon son contenu pour que les boutons ne soient jamais coupés
+        if g.process:
+            win.after(2000, watch)
         win.update_idletasks()
         w = max(900, win.winfo_reqwidth())
         h = max(640, win.winfo_reqheight() + 24)

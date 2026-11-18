@@ -45,5 +45,6 @@
     "Le fichier est passé en lecture seule : sinon Apex écrase ces réglages au lancement suivant.",
     "Pour changer un réglage vidéo dans le jeu, clique d'abord sur Restaurer l'original, puis réoptimise ensuite.",
     "Lance Apex une fois avant d'optimiser pour que videoconfig.txt existe."
-  ]
+  ],
+  "process": "r5apex.exe"
 }

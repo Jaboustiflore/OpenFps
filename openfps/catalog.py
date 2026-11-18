@@ -12,6 +12,7 @@ import re
 import shutil
 import stat
 import sys
+import subprocess
 import tempfile
 from dataclasses import dataclass, field
 from typing import Optional
@@ -61,6 +62,7 @@ class Game:
     custom_path: Optional[str] = None
     read_only_after: bool = False  # le jeu réécrase sa config : on la verrouille
     steam_appid: Optional[int] = None  # pour retrouver la jaquette dans le cache Steam
+    process: str = ""  # nom du processus du jeu (ex. cod.exe), pour détecter qu'il tourne
 
     def candidate_paths(self):
         if self.custom_path:
@@ -106,6 +108,21 @@ def expand(path: str) -> str:
     return path.replace("\\", os.sep) if os.sep != "\\" else path
 
 
+def is_running(process_name: str) -> bool:
+    """Vrai si un processus de ce nom tourne (Windows via tasklist ; sinon False)."""
+    if not process_name or os.name != "nt":
+        return False
+    try:
+        flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+        out = subprocess.run(
+            ["tasklist", "/FI", f"IMAGENAME eq {process_name}", "/NH", "/FO", "CSV"],
+            capture_output=True, text=True, timeout=5, creationflags=flags,
+        ).stdout
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return process_name.lower() in out.lower()
+
+
 def _slug(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", text.lower()).strip("_")
 
@@ -124,6 +141,7 @@ def load_game_file(path: str) -> list:
         status=d.get("status", "stable"),
         read_only_after=d.get("read_only_after", False),
         steam_appid=d.get("steam_appid"),
+        process=d.get("process", ""),
     )
     disc = d.get("discover")
     if not disc:
