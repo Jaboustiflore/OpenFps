@@ -220,9 +220,18 @@ class App(tk.Tk):
         path_lbl.pack(fill="x", pady=(2, 8))
 
         cols = ("Réglage", "Actuel", "Nouveau")
+        # barre de boutons, conseils et statut ancrés en bas : toujours visibles
+        bar = tk.Frame(right, bg=BG)
+        bar.pack(side="bottom", fill="x", pady=(4, 0))
+        status = tk.Label(right, text="", bg=BG, fg="#5ee38b", anchor="w")
+        status.pack(side="bottom", fill="x")
+        tips = tk.Label(right, text="", bg=BG, fg=MUTED, anchor="w", wraplength=500,
+                        justify="left", font=("Segoe UI", 9))
+        tips.pack(side="bottom", fill="x", pady=6)
+
         tree_box = tk.Frame(right, bg=BG)
         tree_box.pack(fill="both", expand=True)
-        tree = ttk.Treeview(tree_box, columns=cols, show="headings", height=14)
+        tree = ttk.Treeview(tree_box, columns=cols, show="headings", height=10)
         for col, wd in zip(cols, (270, 110, 110)):
             tree.heading(col, text=col)
             tree.column(col, width=wd)
@@ -231,14 +240,6 @@ class App(tk.Tk):
         vsb.pack(side="right", fill="y")
         tree.pack(side="left", fill="both", expand=True)
 
-        tips = tk.Label(right, text="", bg=BG, fg=MUTED, anchor="w", wraplength=500,
-                        justify="left", font=("Segoe UI", 9))
-        tips.pack(fill="x", pady=6)
-        status = tk.Label(right, text="", bg=BG, fg="#5ee38b", anchor="w")
-        status.pack(fill="x")
-
-        bar = tk.Frame(right, bg=BG)
-        bar.pack(fill="x", pady=(4, 0))
         btn_opt = ttk.Button(bar, text="Optimiser", style="Accent.TButton")
         btn_res = ttk.Button(bar, text="Restaurer l'original", style="Plain.TButton")
         btn_browse = ttk.Button(bar, text="Choisir le fichier...", style="Plain.TButton")
