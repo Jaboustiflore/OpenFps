@@ -11,6 +11,10 @@ Optimiseur de FPS open source pour Windows. Tu choisis un jeu dans le catalogue,
 
 Une sauvegarde `fichier.openfps.bak` de ta config d'origine est créée au premier passage. Le bouton **Restaurer l'original** la remet en place.
 
+### Sans l'exe (depuis le code source)
+
+Installe [Python 3](https://www.python.org/downloads/) (coche *Add python.exe to PATH*), puis double-clique sur **`Lancer_OpenFPS.bat`**. Ne double-clique pas sur `run_openfps.py` : Windows l'ouvrirait dans ton éditeur de code.
+
 ## Comment ça marche
 
 1. **Détection** : `nvidia-smi` si présent, sinon PowerShell/WMI pour le GPU ; API Windows pour la RAM ; nombre de threads CPU ; résolution de l'écran.
