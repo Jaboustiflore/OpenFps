@@ -109,7 +109,7 @@ class DiscoveryTests(unittest.TestCase):
                     "[/Script/Engine.GameUserSettings]\nbUseVSync=True\nFrameRateLimit=60.000000\n")
         os.environ["LOCALAPPDATA"] = local
         games = [g for g in catalog.load_catalog() if g.id.startswith("ue:")]
-        self.assertEqual([g.name for g in games], ["CoolGame (Unreal Engine, auto)"])
+        self.assertEqual([g.name for g in games], ["Cool Game (Unreal Engine, auto)"])
         env = scoring.variables(hw("Intel(R) UHD Graphics 620", 4, 8, integrated=True))
         catalog.apply(games[0], ini, env)
         text = open(ini).read()
@@ -270,3 +270,27 @@ class CodTests(unittest.TestCase):
         os.environ["LOCALAPPDATA"] = tmp
         g = next(x for x in catalog.load_catalog() if x.id == "cod_mw4")
         self.assertEqual(g.find_all(), [f])
+
+
+class NamesAndCoversTest(unittest.TestCase):
+    def test_pretty_name(self):
+        from openfps import catalog
+        self.assertEqual(catalog.pretty_name("BackroomsDemo"), "Backrooms Demo")
+        self.assertEqual(catalog.pretty_name("Backrooms_Escape"), "Backrooms Escape")
+        self.assertEqual(catalog.pretty_name("enshrouded"), "Enshrouded")
+
+    def test_name_map_with_appid(self):
+        import json, tempfile, os
+        from openfps import catalog
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = os.path.join(tmp, "Pal", "Saved", "Config", "Windows")
+            os.makedirs(cfg)
+            open(os.path.join(cfg, "GameUserSettings.ini"), "w").write("[a]\nx=1\n")
+            d = {"id": "ue", "discover": {"glob": [tmp + "/*/Saved/Config/*/GameUserSettings.ini"],
+                 "name_regex": "/([^/]+)/Saved/", "name_map": {"Pal": {"name": "Palworld", "steam_appid": 1623730}}},
+                 "settings": [{"key": "x", "formula": "1"}]}
+            fp = os.path.join(tmp, "g.json")
+            json.dump(d, open(fp, "w"))
+            games = catalog.load_game_file(fp)
+            self.assertEqual(games[0].name, "Palworld")
+            self.assertEqual(games[0].steam_appid, 1623730)

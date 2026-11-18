@@ -123,6 +123,25 @@ def is_running(process_name: str) -> bool:
     return process_name.lower() in out.lower()
 
 
+def pretty_name(label: str) -> str:
+    """Rend lisible un nom de dossier : BackroomsDemo -> Backrooms Demo."""
+    t = label.replace("_", " ").strip()
+    t = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", " ", t)
+    t = re.sub(r"(?<=[A-Z])(?=[A-Z][a-z])", " ", t)
+    return t[:1].upper() + t[1:] if t.islower() else t
+
+
+def user_names() -> dict:
+    """Noms personnalisés : %APPDATA%\\OpenFPS\\names.json  {"dossier": "Nom du jeu"}."""
+    p = os.path.join(os.environ.get("APPDATA", os.path.expanduser("~")), "OpenFPS", "names.json")
+    try:
+        with open(p, encoding="utf-8") as f:
+            data = json.load(f)
+        return {str(k): v for k, v in data.items() if isinstance(v, str)}
+    except (OSError, ValueError, AttributeError):
+        return {}
+
+
 def _slug(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", text.lower()).strip("_")
 
@@ -156,12 +175,20 @@ def load_game_file(path: str) -> list:
             if m:
                 grouped.setdefault(m.group(1), []).append(found)
     games = []
+    custom = user_names()
     for label, files in grouped.items():
-        shown = name_map.get(label, label)
+        entry = name_map.get(label)
+        appid = common.get("steam_appid")
+        if isinstance(entry, dict):
+            shown, appid = entry.get("name", label), entry.get("steam_appid", appid)
+        else:
+            shown = entry or pretty_name(label)
+        shown = custom.get(label, shown)
+        game_common = dict(common, steam_appid=appid)
         games.append(Game(
             id=f"{d['id']}:{_slug(label)}",
             name=disc.get("name_format", "{name}").format(name=shown),
-            paths=files, **common,
+            paths=files, **game_common,
         ))
     return games
 

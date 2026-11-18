@@ -31,6 +31,8 @@ class App(tk.Tk):
         self._images = {}  # (id, w, h) -> PhotoImage (garde une référence)
         self._cols = 0
         self._after = None
+        self._requested = set()  # appids dont on a déjà demandé la jaquette
+        self._dl_after = None
         self._style()
         self._build()
         self._detect_async()
@@ -136,6 +138,8 @@ class App(tk.Tk):
             return self._images[key]
         img = None
         path = covers.find_cover(g)
+        if path is None and Image is not None:
+            self._queue_download(g)
         try:
             if path and Image is not None:
                 im = Image.open(path).convert("RGB").resize((w, h), Image.LANCZOS)
@@ -148,6 +152,28 @@ class App(tk.Tk):
             img = None
         self._images[key] = img
         return img
+
+    def _queue_download(self, g):
+        appid = getattr(g, "steam_appid", None)
+        if not appid or appid in self._requested:
+            return
+        self._requested.add(appid)
+
+        def work():
+            if covers.download_cover(appid):
+                self.after(0, self._covers_changed)
+        threading.Thread(target=work, daemon=True).start()
+
+    def _covers_changed(self):
+        """Une jaquette vient d'arriver : on rafraîchit le catalogue (regroupé)."""
+        if self._dl_after:
+            self.after_cancel(self._dl_after)
+        def redo():
+            self._dl_after = None
+            for k in [k for k, v in self._images.items() if v is None]:
+                del self._images[k]
+            self._render()
+        self._dl_after = self.after(700, redo)
 
     def _poster(self, parent, g, w, h, installed, clickable):
         c = tk.Canvas(parent, width=w, height=h, bg=BG, highlightthickness=2,

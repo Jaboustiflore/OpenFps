@@ -3,7 +3,8 @@
 Ordre de recherche :
 1. une image fournie par l'utilisateur : %APPDATA%\\OpenFPS\\covers\\<id>.png|jpg
 2. la jaquette déjà présente dans le cache local de Steam (jeux avec "steam_appid")
-3. sinon l'interface dessine une jaquette générée (couleur déduite de l'id).
+3. sinon téléchargée depuis le CDN officiel de Steam (dans le dossier ci-dessus)
+4. sinon l'interface dessine une jaquette générée (couleur déduite de l'id).
 """
 
 from __future__ import annotations
@@ -13,6 +14,7 @@ import glob
 import hashlib
 import os
 import re
+import urllib.request
 
 EXTS = ("png", "jpg", "jpeg")
 
@@ -75,7 +77,44 @@ def find_cover(game):
                 return p
     appid = getattr(game, "steam_appid", None)
     if appid:
-        return steam_cover(int(appid))
+        hit = steam_cover(int(appid))
+        if hit:
+            return hit
+        cached = os.path.join(user_covers_dir(), f"steam_{int(appid)}.jpg")
+        if os.path.isfile(cached):
+            return cached
+    return None
+
+
+_FAILED: set = set()
+CDN = ("https://cdn.cloudflare.steamstatic.com/steam/apps/{id}/library_600x900.jpg",
+       "https://cdn.akamai.steamstatic.com/steam/apps/{id}/library_600x900.jpg")
+
+
+def download_cover(appid: int):
+    """Télécharge la jaquette officielle depuis le CDN de Steam dans le dossier de
+    l'utilisateur (rien n'est embarqué dans le dépôt). Retourne le chemin ou None."""
+    appid = int(appid)
+    if appid in _FAILED:
+        return None
+    dest = os.path.join(user_covers_dir(), f"steam_{appid}.jpg")
+    if os.path.isfile(dest):
+        return dest
+    for url in CDN:
+        try:
+            req = urllib.request.Request(url.format(id=appid), headers={"User-Agent": "OpenFPS"})
+            with urllib.request.urlopen(req, timeout=10) as r:
+                data = r.read()
+            if len(data) > 2000 and data[:2] == b"\xff\xd8":  # JPEG valide
+                os.makedirs(os.path.dirname(dest), exist_ok=True)
+                tmp = dest + ".part"
+                with open(tmp, "wb") as f:
+                    f.write(data)
+                os.replace(tmp, dest)
+                return dest
+        except Exception:
+            continue
+    _FAILED.add(appid)
     return None
 
 

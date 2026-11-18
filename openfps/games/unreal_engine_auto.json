@@ -9,8 +9,99 @@
     "name_regex": "Local/([^/]+)/Saved/",
     "name_format": "{name} (Unreal Engine, auto)",
     "name_map": {
-      "FortniteGame": "Fortnite",
-      "VALORANT": "Valorant"
+      "FortniteGame": {
+        "name": "Fortnite"
+      },
+      "VALORANT": {
+        "name": "Valorant"
+      },
+      "DeadByDaylight": {
+        "name": "Dead by Daylight",
+        "steam_appid": 381210
+      },
+      "TslGame": {
+        "name": "PUBG: BATTLEGROUNDS",
+        "steam_appid": 578080
+      },
+      "Pal": {
+        "name": "Palworld",
+        "steam_appid": 1623730
+      },
+      "FactoryGame": {
+        "name": "Satisfactory",
+        "steam_appid": 526870
+      },
+      "Remnant2": {
+        "name": "Remnant II",
+        "steam_appid": 1282100
+      },
+      "Icarus": {
+        "name": "ICARUS",
+        "steam_appid": 1149460
+      },
+      "enshrouded": {
+        "name": "Enshrouded",
+        "steam_appid": 1203620
+      },
+      "ItTakesTwo": {
+        "name": "It Takes Two",
+        "steam_appid": 1426210
+      },
+      "Ghostrunner": {
+        "name": "Ghostrunner",
+        "steam_appid": 1139900
+      },
+      "Ghostrunner2": {
+        "name": "Ghostrunner 2",
+        "steam_appid": 1215280
+      },
+      "Hogwarts Legacy": {
+        "name": "Hogwarts Legacy",
+        "steam_appid": 990080
+      },
+      "HogwartsLegacy": {
+        "name": "Hogwarts Legacy",
+        "steam_appid": 990080
+      },
+      "QuantumBreak": {
+        "name": "Quantum Break",
+        "steam_appid": 474960
+      },
+      "PAYDAY3": {
+        "name": "PAYDAY 3",
+        "steam_appid": 1272080
+      },
+      "FragPunk": {
+        "name": "FragPunk",
+        "steam_appid": 1721470
+      },
+      "Marvel": {
+        "name": "Marvel Rivals",
+        "steam_appid": 2767030
+      },
+      "Sandfall": {
+        "name": "Clair Obscur: Expedition 33",
+        "steam_appid": 1903340
+      },
+      "LOTF2": {
+        "name": "Lords of the Fallen",
+        "steam_appid": 1501750
+      },
+      "GBFR": {
+        "name": "Granblue Fantasy: Relink",
+        "steam_appid": 881020
+      },
+      "EscapeTheBackrooms": {
+        "name": "Escape the Backrooms",
+        "steam_appid": 1943950
+      },
+      "TL": {
+        "name": "Throne and Liberty",
+        "steam_appid": 2429640
+      },
+      "DungeonCrawler": {
+        "name": "Dark and Darker"
+      }
     }
   },
   "separator": "=",
