@@ -1,20 +1,59 @@
 {
   "id": "cs2",
   "name": "Counter-Strike 2",
+  "steam_appid": 730,
   "status": "experimental",
-  "paths": ["%ProgramFiles(x86)%\\Steam\\userdata\\*\\730\\local\\cfg\\cs2_video.txt"],
+  "paths": [
+    "%ProgramFiles(x86)%\\Steam\\userdata\\*\\730\\local\\cfg\\cs2_video.txt"
+  ],
   "separator": "vdf",
   "only_existing": true,
   "settings": [
-    {"key": "setting.mat_vsync", "label": "VSync", "formula": "0"},
-    {"key": "setting.msaa_samples", "label": "MSAA (0 = désactivé)", "formula": "0"},
-    {"key": "setting.r_csgo_cmaa_enable", "label": "CMAA2 (anti-aliasing léger)", "formula": "1"},
-    {"key": "setting.videocfg_shadow_quality", "label": "Qualité des ombres", "formula": "0 if gpu < 70 else 1"},
-    {"key": "setting.videocfg_dynamic_shadows", "label": "Ombres dynamiques", "formula": "0 if gpu < 60 else 1"},
-    {"key": "setting.videocfg_texture_detail", "label": "Détail des textures", "formula": "0 if vram_gb < 4 else 1"},
-    {"key": "setting.videocfg_particle_detail", "label": "Détail des particules", "formula": "0"},
-    {"key": "setting.videocfg_ao_detail", "label": "Occlusion ambiante", "formula": "0"},
-    {"key": "setting.r_low_latency", "label": "Faible latence", "formula": "1"}
+    {
+      "key": "setting.mat_vsync",
+      "label": "VSync",
+      "formula": "0"
+    },
+    {
+      "key": "setting.msaa_samples",
+      "label": "MSAA (0 = désactivé)",
+      "formula": "0"
+    },
+    {
+      "key": "setting.r_csgo_cmaa_enable",
+      "label": "CMAA2 (anti-aliasing léger)",
+      "formula": "1"
+    },
+    {
+      "key": "setting.videocfg_shadow_quality",
+      "label": "Qualité des ombres",
+      "formula": "0 if gpu < 70 else 1"
+    },
+    {
+      "key": "setting.videocfg_dynamic_shadows",
+      "label": "Ombres dynamiques",
+      "formula": "0 if gpu < 60 else 1"
+    },
+    {
+      "key": "setting.videocfg_texture_detail",
+      "label": "Détail des textures",
+      "formula": "0 if vram_gb < 4 else 1"
+    },
+    {
+      "key": "setting.videocfg_particle_detail",
+      "label": "Détail des particules",
+      "formula": "0"
+    },
+    {
+      "key": "setting.videocfg_ao_detail",
+      "label": "Occlusion ambiante",
+      "formula": "0"
+    },
+    {
+      "key": "setting.r_low_latency",
+      "label": "Faible latence",
+      "formula": "1"
+    }
   ],
   "tips": [
     "Expérimental : Steam Cloud peut réécrire cs2_video.txt. Si les réglages reviennent, désactive Steam Cloud pour CS2 puis relance l'optimisation.",

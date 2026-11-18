@@ -1,5 +1,10 @@
 @echo off
 cd /d "%~dp0"
+where python >nul 2>&1
+if %errorlevel%==0 (
+    python -c "import PIL" >nul 2>&1
+    if errorlevel 1 python -m pip install --quiet --user pillow
+)
 where pythonw >nul 2>&1
 if %errorlevel%==0 (
     start "" pythonw run_openfps.py

@@ -178,3 +178,33 @@ class PopularGamesTests(unittest.TestCase):
         catalog.apply_all(games[0], scoring.variables(hw("NVIDIA GeForce GTX 1650")))
         for f in files:
             self.assertIn("sg.ShadowQuality=0", open(f).read())
+
+
+class CoverTests(unittest.TestCase):
+    def test_steam_cache_old_and_new_layout_and_user_override(self):
+        from openfps import covers
+        tmp = tempfile.mkdtemp()
+        steam = os.path.join(tmp, "Steam")
+        cache = os.path.join(steam, "appcache", "librarycache")
+        os.makedirs(os.path.join(cache, "730", "abcdef"))
+        new = os.path.join(cache, "730", "abcdef", "library_600x900.jpg")
+        open(new, "w").close()
+        old = os.path.join(cache, "1172470_library_600x900.jpg")
+        open(old, "w").close()
+        os.environ["ProgramFiles(x86)"] = tmp
+        os.environ["APPDATA"] = os.path.join(tmp, "Roaming")
+        cs2 = next(g for g in catalog.load_catalog() if g.id == "cs2")
+        apex = next(g for g in catalog.load_catalog() if g.id == "apex_legends")
+        self.assertEqual(covers.find_cover(cs2), new)
+        self.assertEqual(covers.find_cover(apex), old)
+        mc = next(g for g in catalog.load_catalog() if g.id == "minecraft_java")
+        self.assertIsNone(covers.find_cover(mc))
+        mine = os.path.join(covers.user_covers_dir(), "minecraft_java.png")
+        os.makedirs(os.path.dirname(mine))
+        open(mine, "w").close()
+        self.assertEqual(covers.find_cover(mc), mine)
+
+    def test_tile_colors_are_stable_and_distinct(self):
+        from openfps import covers
+        self.assertEqual(covers.tile_colors("cs2"), covers.tile_colors("cs2"))
+        self.assertNotEqual(covers.tile_colors("cs2"), covers.tile_colors("apex_legends"))

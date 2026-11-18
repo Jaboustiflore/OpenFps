@@ -20,7 +20,7 @@ jobs:
       - name: Tests
         run: python -m unittest discover -s tests -v
       - name: Install PyInstaller
-        run: pip install pyinstaller
+        run: pip install pyinstaller pillow
       - name: Build exe
         run: >
           pyinstaller --onefile --windowed --name OpenFPS

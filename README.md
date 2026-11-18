@@ -15,6 +15,10 @@ Une sauvegarde `fichier.openfps.bak` de ta config d'origine est créée au premi
 
 Installe [Python 3](https://www.python.org/downloads/) (coche *Add python.exe to PATH*), puis double-clique sur **`Lancer_OpenFPS.bat`**. Ne double-clique pas sur `run_openfps.py` : Windows l'ouvrirait dans ton éditeur de code.
 
+### Jaquettes
+
+L'interface affiche un catalogue en cartes. Aucune image protégée n'est incluse dans le dépôt : OpenFPS utilise la jaquette **déjà présente dans le cache de ton Steam** (jeux avec `steam_appid` dans leur JSON), sinon il génère une carte colorée. Pour mettre ta propre image : `%APPDATA%\OpenFPS\covers\<id_du_jeu>.png` (ou `.jpg`). L'affichage des JPG de Steam demande Pillow (`pip install pillow`, installé automatiquement par `Lancer_OpenFPS.bat` et inclus dans l'exe).
+
 ## Comment ça marche
 
 1. **Détection** : `nvidia-smi` si présent, sinon PowerShell/WMI pour le GPU ; API Windows pour la RAM ; nombre de threads CPU ; résolution de l'écran.

@@ -59,6 +59,7 @@ class Game:
     status: str = "stable"
     custom_path: Optional[str] = None
     read_only_after: bool = False  # le jeu réécrase sa config : on la verrouille
+    steam_appid: Optional[int] = None  # pour retrouver la jaquette dans le cache Steam
 
     def candidate_paths(self):
         if self.custom_path:
@@ -115,6 +116,7 @@ def load_game_file(path: str) -> list:
         tips=d.get("tips", []),
         status=d.get("status", "stable"),
         read_only_after=d.get("read_only_after", False),
+        steam_appid=d.get("steam_appid"),
     )
     disc = d.get("discover")
     if not disc:
