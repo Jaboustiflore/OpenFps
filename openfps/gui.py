@@ -228,6 +228,11 @@ class App(tk.Tk):
         tips = tk.Label(right, text="", bg=BG, fg=MUTED, anchor="w", wraplength=500,
                         justify="left", font=("Segoe UI", 9))
         tips.pack(side="bottom", fill="x", pady=6)
+        why_lbl = tk.Label(right, text="Clique sur un réglage pour voir pourquoi il change.",
+                           bg="#202020", fg="#ffd479", anchor="w", wraplength=520,
+                           justify="left", font=("Segoe UI", 10), padx=8, pady=6)
+        why_lbl.pack(side="bottom", fill="x", pady=(6, 0))
+        why_map = {}
 
         tree_box = tk.Frame(right, bg=BG)
         tree_box.pack(fill="both", expand=True)
@@ -235,6 +240,11 @@ class App(tk.Tk):
         for col, wd in zip(cols, (270, 110, 110)):
             tree.heading(col, text=col)
             tree.column(col, width=wd)
+        def on_select(_e=None):
+            sel = tree.selection()
+            if sel:
+                why_lbl.config(text=why_map.get(sel[0]) or "Réglage ajusté pour gagner en FPS.")
+        tree.bind("<<TreeviewSelect>>", on_select)
         vsb = ttk.Scrollbar(tree_box, orient="vertical", command=tree.yview)
         tree.configure(yscrollcommand=vsb.set)
         vsb.pack(side="right", fill="y")
@@ -253,6 +263,7 @@ class App(tk.Tk):
             self._poster(poster_holder, g, 180, 270, bool(g.find_config()),
                          clickable=False).pack()
             tree.delete(*tree.get_children())
+            why_map.clear()
             path = g.find_config()
             path_lbl.config(text=path or "Fichier de config introuvable : lance le jeu une "
                                          "fois, ou utilise « Choisir le fichier... ».")
@@ -268,7 +279,8 @@ class App(tk.Tk):
             if path:
                 try:
                     for ch in catalog.plan(g, path, self.env):
-                        tree.insert("", "end", values=(ch.label, ch.old, ch.new))
+                        iid = tree.insert("", "end", values=(ch.label, ch.old, ch.new))
+                        why_map[iid] = ch.why
                 except OSError as exc:
                     status.config(text=f"Lecture impossible : {exc}", fg="#ff6b6b")
             if path and not tree.get_children():

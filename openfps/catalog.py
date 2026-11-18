@@ -45,6 +45,7 @@ class Setting:
     formula: str
     label: str = ""
     section: str = ""
+    why: str = ""
 
 
 @dataclass
@@ -90,6 +91,7 @@ class Change:
     label: str
     old: Optional[str]
     new: str
+    why: str = ""
 
 
 def expand(path: str) -> str:
@@ -225,7 +227,7 @@ def plan(game: Game, path: str, env: dict) -> list:
             shown = f'"{new}"'
         if old == shown:
             continue
-        changes.append(Change(s.key, s.label or s.key, old, shown))
+        changes.append(Change(s.key, s.label or s.key, old, shown, s.why))
     return changes
 
 

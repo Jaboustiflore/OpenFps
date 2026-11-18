@@ -12,157 +12,188 @@
     {
       "key": "VSync@0",
       "label": "VSync",
-      "formula": "'disabled'"
+      "formula": "'disabled'",
+      "why": "Le VSync ajoute de la latence et peut faire chuter les FPS. Désactivé = images affichées dès qu'elles sont prêtes."
     },
     {
       "key": "CapFps@0",
       "label": "Limiter les FPS",
-      "formula": "false"
+      "formula": "false",
+      "why": "Une limite de FPS bride ta machine. Désactivée, le jeu va aussi vite que ton PC le permet."
     },
     {
       "key": "NvidiaReflex@0",
       "label": "NVIDIA Reflex (faible latence)",
-      "formula": "'Enabled'"
+      "formula": "'Enabled'",
+      "why": "Réduit la latence entre ta souris et l'écran (coût en FPS quasi nul)."
     },
     {
       "key": "ResolutionMultiplier@0",
       "label": "Échelle de rendu 3D (%)",
-      "formula": "clamp(round(55 + gpu * 0.5), 55, 100)"
+      "formula": "clamp(round(55 + gpu * 0.5), 55, 100)",
+      "why": "Résolution de rendu 3D : plus elle baisse, plus les FPS montent, au prix d'une image moins nette. Calculée selon la puissance de ton GPU."
     },
     {
       "key": "TextureQuality@0",
       "label": "Textures (0 = meilleures, 3 = plus basses)",
-      "formula": "0 if vram_gb >= 6 else (1 if vram_gb >= 4 else 2)"
+      "formula": "0 if vram_gb >= 6 else (1 if vram_gb >= 4 else 2)",
+      "why": "Les textures coûtent peu de FPS tant que la VRAM suffit. Gardées au maximum si ta carte a assez de mémoire."
     },
     {
       "key": "ShadowQuality@0",
       "label": "Ombres",
-      "formula": "'Very_Low' if gpu < 40 else ('Low' if gpu < 72 else ('Medium' if gpu < 88 else 'High'))"
+      "formula": "'Very_Low' if gpu < 40 else ('Low' if gpu < 72 else ('Medium' if gpu < 88 else 'High'))",
+      "why": "Les ombres sont l'un des réglages les plus gourmands : les baisser donne beaucoup de FPS."
     },
     {
       "key": "ShadowFilteringQuality@0",
       "label": "Filtrage des ombres",
-      "formula": "'Low' if gpu < 80 else 'Medium'"
+      "formula": "'Low' if gpu < 80 else 'Medium'",
+      "why": "Adoucit le bord des ombres : coûteux pour un gain visuel discret."
     },
     {
       "key": "ScreenSpaceShadowQuality@0",
       "label": "Ombres écran",
-      "formula": "'Off' if gpu < 85 else 'Low'"
+      "formula": "'Off' if gpu < 85 else 'Low'",
+      "why": "Ombres supplémentaires calculées à l'écran, gourmandes pour peu de différence en jeu."
     },
     {
       "key": "ShadingQuality@0",
       "label": "Ombrage",
-      "formula": "'Low' if gpu < 75 else 'High'"
+      "formula": "'Low' if gpu < 75 else 'High'",
+      "why": "Complexité de l'éclairage des surfaces : Low libère beaucoup de puissance GPU."
     },
     {
       "key": "ParticleQuality@0",
       "label": "Particules",
-      "formula": "'very low' if gpu < 60 else 'low'"
+      "formula": "'very low' if gpu < 60 else 'low'",
+      "why": "Fumée, étincelles, explosions : moins de particules = moins de chutes de FPS dans les gros combats."
     },
     {
       "key": "ModelQuality@0",
       "label": "Modèles 3D",
-      "formula": "'Low Quality' if gpu < 70 else 'Medium Quality'"
+      "formula": "'Low Quality' if gpu < 70 else 'Medium Quality'",
+      "why": "Détail des modèles 3D : baissé pour soulager le GPU et le CPU."
     },
     {
       "key": "SSRQuality@0",
       "label": "Réflexions écran",
-      "formula": "'Off'"
+      "formula": "'Off'",
+      "why": "Réflexions calculées à l'écran : très coûteuses, désactivées."
     },
     {
       "key": "AmbientLightingQuality@0",
       "label": "Éclairage ambiant",
-      "formula": "'Off' if gpu < 55 else 'Low'"
+      "formula": "'Off' if gpu < 55 else 'Low'",
+      "why": "Occlusion ambiante : assombrit les recoins, coûteuse en FPS."
     },
     {
       "key": "VolumetricQuality@0",
       "label": "Volumétrique (1)",
-      "formula": "'QUALITY_LOW' if gpu < 85 else 'QUALITY_MEDIUM'"
+      "formula": "'QUALITY_LOW' if gpu < 85 else 'QUALITY_MEDIUM'",
+      "why": "Brouillard et lumière volumétriques : très gourmand, abaissé."
     },
     {
       "key": "VolumetricQuality@1",
       "label": "Volumétrique (2)",
-      "formula": "'QUALITY_LOW' if gpu < 85 else 'QUALITY_MEDIUM'"
+      "formula": "'QUALITY_LOW' if gpu < 85 else 'QUALITY_MEDIUM'",
+      "why": "Brouillard et lumière volumétriques : très gourmand, abaissé."
     },
     {
       "key": "WeatherGridVolumesQuality@0",
       "label": "Météo volumétrique",
-      "formula": "'Off' if gpu < 60 else 'Low'"
+      "formula": "'Off' if gpu < 60 else 'Low'",
+      "why": "Météo volumétrique (brume, pluie 3D) : coûteuse, réduite."
     },
     {
       "key": "WaterCausticsMode@0",
       "label": "Reflets de l'eau",
-      "formula": "'Off'"
+      "formula": "'Off'",
+      "why": "Reflets lumineux dans l'eau : purement décoratif, désactivé."
     },
     {
       "key": "DeferredPhysics@0",
       "label": "Physique différée",
-      "formula": "'Low Quality' if gpu < 75 else 'Medium Quality'"
+      "formula": "'Low Quality' if gpu < 75 else 'Medium Quality'",
+      "why": "Physique des objets : réduite pour alléger CPU et GPU."
     },
     {
       "key": "ShaderQuality@0",
       "label": "Qualité des shaders",
-      "formula": "'Low' if gpu < 40 else ('Medium' if gpu < 70 else 'Default')"
+      "formula": "'Low' if gpu < 40 else ('Medium' if gpu < 70 else 'Default')",
+      "why": "Complexité des shaders : plus simple = plus de FPS et moins de saccades."
     },
     {
       "key": "DofEnable@0",
       "label": "Profondeur de champ",
-      "formula": "'Off'"
+      "formula": "'Off'",
+      "why": "Flou d'arrière-plan : désactivé pour une image plus nette et plus rapide."
     },
     {
       "key": "DepthOfFieldQuality@0",
       "label": "Qualité profondeur de champ",
-      "formula": "'Low'"
+      "formula": "'Low'",
+      "why": "Qualité du flou de profondeur : au plus bas."
     },
     {
       "key": "MotionBlur@0",
       "label": "Flou de mouvement",
-      "formula": "'Off'"
+      "formula": "'Off'",
+      "why": "Le flou de mouvement gêne la visée et coûte des FPS : désactivé."
     },
     {
       "key": "WeaponMotionBlur@0",
       "label": "Flou de mouvement des armes",
-      "formula": "false"
+      "formula": "false",
+      "why": "Flou sur l'arme : désactivé pour garder la visée nette."
     },
     {
       "key": "EnableVelocityBasedBlur@0",
       "label": "Flou radial",
-      "formula": "false"
+      "formula": "false",
+      "why": "Flou radial lié à la vitesse : désactivé."
     },
     {
       "key": "DxrMode@0",
       "label": "Ray tracing (1)",
-      "formula": "'Off'"
+      "formula": "'Off'",
+      "why": "Ray tracing : extrêmement coûteux, désactivé pour les FPS."
     },
     {
       "key": "DxrMode@1",
       "label": "Ray tracing (2)",
-      "formula": "'Off'"
+      "formula": "'Off'",
+      "why": "Ray tracing : extrêmement coûteux, désactivé pour les FPS."
     },
     {
       "key": "TerrainQuality@0",
       "label": "Terrain",
-      "formula": "'Very Low' if gpu < 40 else ('Low' if gpu < 75 else ('Medium' if gpu < 90 else 'High'))"
+      "formula": "'Very Low' if gpu < 40 else ('Low' if gpu < 75 else ('Medium' if gpu < 90 else 'High'))",
+      "why": "Détail du sol et du relief : le baisser libère du GPU, peu visible en plein combat."
     },
     {
       "key": "Tessellation@0",
       "label": "Tessellation",
-      "formula": "'0_Off' if gpu < 85 else '1_Near'"
+      "formula": "'0_Off' if gpu < 85 else '1_Near'",
+      "why": "Ajoute de la géométrie fine sur les surfaces : coûteuse, désactivée sauf GPU puissants."
     },
     {
       "key": "TextureFilter@0",
       "label": "Filtrage anisotrope",
-      "formula": "'aniso 4x' if gpu < 75 else 'aniso 8x'"
+      "formula": "'aniso 4x' if gpu < 75 else 'aniso 8x'",
+      "why": "Netteté des textures vues de biais : 4x est quasi identique à 16x pour bien moins de coût."
     },
     {
       "key": "DLSSModelUI@0",
       "label": "Modèle DLSS (CNN = plus rapide sur RTX 20/30)",
-      "formula": "'CNN' if gpu < 80 else 'TRANSFORMER'"
+      "formula": "'CNN' if gpu < 80 else 'TRANSFORMER'",
+      "why": "Le modèle Transformer est plus beau mais nettement plus lourd sur RTX 20/30 ; CNN est plus rapide et réduit les saccades."
     },
     {
       "key": "DLSSPerfModeMP@0",
       "label": "Mode DLSS",
-      "formula": "'Maximum Performance' if gpu < 45 else ('Balanced' if gpu < 85 else 'Maximum Quality')"
+      "formula": "'Maximum Performance' if gpu < 45 else ('Balanced' if gpu < 85 else 'Maximum Quality')",
+      "why": "Mode DLSS : plus il privilégie la performance, plus les FPS montent (image légèrement moins fine). Sans effet si DLSS est désactivé."
     }
   ],
   "tips": [
