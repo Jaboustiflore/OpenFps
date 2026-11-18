@@ -213,6 +213,7 @@ class CoverTests(unittest.TestCase):
 class SteamPathTests(unittest.TestCase):
     def test_steampath_resolves_to_steam_root_on_other_drive(self):
         from openfps import covers
+        os.environ.pop("ProgramFiles(x86)", None)  # isole des autres tests
         tmp = tempfile.mkdtemp()
         steam = os.path.join(tmp, "F", "Steam")
         d = os.path.join(steam, "userdata", "999", "730", "local", "cfg")
