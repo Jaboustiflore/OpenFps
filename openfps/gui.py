@@ -113,9 +113,10 @@ class App(tk.Tk):
         shown = [g for g in self.games if q in g.name.lower()]
         installed = [g for g in shown if g.find_config()]
         others = [g for g in shown if g not in installed]
+        # uniquement les jeux installés sur ce PC
         self._section("Détectés sur ton PC", installed,
-                      "Aucun jeu du catalogue détecté pour l'instant.")
-        self._section("Catalogue", others, "")
+                      "Aucun jeu détecté pour l'instant : lance un jeu une fois pour qu'il crée "
+                      "sa configuration." if not q else "Aucun jeu détecté ne correspond.")
 
     def _section(self, title, games, empty_text):
         tk.Label(self.inner, text=title, bg=BG, fg=FG, font=("Segoe UI", 14, "bold"),
