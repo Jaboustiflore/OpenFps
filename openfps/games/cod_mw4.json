@@ -204,5 +204,7 @@
     "Pour moins de micro-saccades : mets à jour le pilote graphique et, dans le jeu, laisse la compilation des shaders se terminer au premier lancement.",
     "Le mode DLSS n'est appliqué que si DLSS est activé dans le jeu ; l'échelle de rendu 3D s'applique sinon."
   ],
-  "process": "cod.exe"
+  "process": "cod.exe",
+  "install_dir": "Call of Duty HQ",
+  "exe": "cod.exe"
 }

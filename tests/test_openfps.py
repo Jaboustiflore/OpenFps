@@ -294,3 +294,20 @@ class NamesAndCoversTest(unittest.TestCase):
             games = catalog.load_game_file(fp)
             self.assertEqual(games[0].name, "Palworld")
             self.assertEqual(games[0].steam_appid, 1623730)
+
+
+class PcOptTest(unittest.TestCase):
+    def test_library_paths(self):
+        from openfps import pcopt
+        txt = '"path"\t\t"F:\\\\SteamLibrary"\n"path"\t\t"F:\\\\Steam"'
+        self.assertEqual(pcopt.parse_library_paths(txt), ["F:\\SteamLibrary", "F:\\Steam"])
+
+    def test_layer_flag(self):
+        from openfps import pcopt
+        self.assertEqual(pcopt.add_layer_flag(None), "~ DISABLEDXMAXIMIZEDWINDOWEDMODE")
+        self.assertEqual(pcopt.add_layer_flag("~ HIGHDPIAWARE"),
+                         "~ HIGHDPIAWARE DISABLEDXMAXIMIZEDWINDOWEDMODE")
+        self.assertEqual(pcopt.add_layer_flag("RUNASADMIN"),
+                         "~ RUNASADMIN DISABLEDXMAXIMIZEDWINDOWEDMODE")
+        already = "~ DISABLEDXMAXIMIZEDWINDOWEDMODE"
+        self.assertEqual(pcopt.add_layer_flag(already), already)

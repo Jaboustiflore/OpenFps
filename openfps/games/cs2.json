@@ -61,5 +61,7 @@
     "Certains guides indiquent que des réglages d'ombres de ce fichier sont ignorés par le jeu : vérifie dans les options vidéo.",
     "Le dossier Steam est lu dans le registre Windows (même s'il est sur un autre disque). Sinon, utilise 'Choisir le fichier...'. Ferme CS2 avant d'optimiser."
   ],
-  "process": "cs2.exe"
+  "process": "cs2.exe",
+  "install_dir": "Counter-Strike Global Offensive",
+  "exe": "game/bin/win64/cs2.exe"
 }

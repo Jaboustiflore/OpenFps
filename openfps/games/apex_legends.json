@@ -46,5 +46,7 @@
     "Pour changer un réglage vidéo dans le jeu, clique d'abord sur Restaurer l'original, puis réoptimise ensuite.",
     "Lance Apex une fois avant d'optimiser pour que videoconfig.txt existe."
   ],
-  "process": "r5apex.exe"
+  "process": "r5apex.exe",
+  "install_dir": "Apex Legends",
+  "exe": "r5apex.exe"
 }

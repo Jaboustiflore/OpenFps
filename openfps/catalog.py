@@ -62,7 +62,14 @@ class Game:
     custom_path: Optional[str] = None
     read_only_after: bool = False  # le jeu réécrase sa config : on la verrouille
     steam_appid: Optional[int] = None  # pour retrouver la jaquette dans le cache Steam
+    install_dir: str = ""  # dossier dans steamapps/common (pour retrouver l'exécutable)
+    exe: str = ""  # chemin de l'exécutable relatif à ce dossier
     process: str = ""  # nom du processus du jeu (ex. cod.exe), pour détecter qu'il tourne
+
+    @property
+    def exe_path(self):
+        from . import pcopt
+        return pcopt.find_exe(self.install_dir, self.exe)
 
     def candidate_paths(self):
         if self.custom_path:
@@ -161,6 +168,8 @@ def load_game_file(path: str) -> list:
         read_only_after=d.get("read_only_after", False),
         steam_appid=d.get("steam_appid"),
         process=d.get("process", ""),
+        install_dir=d.get("install_dir", ""),
+        exe=d.get("exe", ""),
     )
     disc = d.get("discover")
     if not disc:

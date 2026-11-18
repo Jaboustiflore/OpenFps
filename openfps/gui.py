@@ -65,6 +65,8 @@ class App(tk.Tk):
                      relief="flat", font=("Segoe UI", 11), width=26)
         e.pack(side="right", ipady=5)
         tk.Label(top, text="Rechercher", bg=BG, fg=MUTED).pack(side="right", padx=8)
+        ttk.Button(top, text="Optimisation PC", style="Plain.TButton",
+                   command=self._open_pc).pack(side="right", padx=(0, 16))
 
         self.hw_label = tk.Label(self, text="Détection de ta configuration...", bg=BG, fg=MUTED,
                                  anchor="w", justify="left", font=("Segoe UI", 9))
@@ -217,6 +219,98 @@ class App(tk.Tk):
         self.hw_label.config(text=(
             f"GPU {hw.gpu_name} (score {e['gpu']}/100)   |   CPU {hw.cpu_threads} threads "
             f"(score {e['cpu']}/100)   |   RAM {hw.ram_gb} Go   |   Écran {hw.screen_w}x{hw.screen_h}"))
+
+    # ---------------------------------------------------------------- PC (Windows)
+    def _open_pc(self):
+        from . import pcopt
+        win = tk.Toplevel(self)
+        win.title("Optimisation du PC")
+        win.configure(bg=BG)
+        win.transient(self)
+        tk.Label(win, text="Optimisation du PC", bg=BG, fg=FG,
+                 font=("Segoe UI", 18, "bold"), anchor="w").pack(fill="x", padx=PAD, pady=(PAD, 2))
+        tk.Label(win, text="Réglages de ton compte Windows utiles aux jeux. Tout est sauvegardé "
+                           "avant changement et se restaure d'un clic.",
+                 bg=BG, fg=MUTED, anchor="w", justify="left", wraplength=640,
+                 font=("Segoe UI", 9)).pack(fill="x", padx=PAD)
+
+        bar = tk.Frame(win, bg=BG)
+        bar.pack(side="bottom", fill="x", padx=PAD, pady=PAD)
+        status = tk.Label(win, text="", bg=BG, fg="#5ee38b", anchor="w", wraplength=640,
+                          justify="left")
+        status.pack(side="bottom", fill="x", padx=PAD)
+        why_lbl = tk.Label(win, text="Clique sur une ligne pour voir à quoi elle sert.",
+                           bg="#202020", fg="#ffd479", anchor="w", wraplength=640,
+                           justify="left", font=("Segoe UI", 10), padx=8, pady=6)
+        why_lbl.pack(side="bottom", fill="x", padx=PAD, pady=6)
+
+        box = tk.Frame(win, bg=BG)
+        box.pack(fill="both", expand=True, padx=PAD, pady=8)
+        cols = ("Réglage", "Actuel", "Cible")
+        tree = ttk.Treeview(box, columns=cols, show="headings", height=9)
+        for col, wd in zip(cols, (380, 130, 130)):
+            tree.heading(col, text=col)
+            tree.column(col, width=wd)
+        vsb = ttk.Scrollbar(box, orient="vertical", command=tree.yview)
+        tree.configure(yscrollcommand=vsb.set)
+        vsb.pack(side="right", fill="y")
+        tree.pack(side="left", fill="both", expand=True)
+        whys = {}
+        tree.bind("<<TreeviewSelect>>", lambda _e: why_lbl.config(
+            text=whys.get((tree.selection() or [""])[0], "")))
+
+        btn_apply = ttk.Button(bar, text="Appliquer", style="Accent.TButton")
+        btn_restore = ttk.Button(bar, text="Restaurer l'original", style="Plain.TButton")
+        btn_apply.pack(side="left")
+        btn_restore.pack(side="left", padx=6)
+
+        def refresh():
+            tree.delete(*tree.get_children())
+            whys.clear()
+            try:
+                items = pcopt.tweaks([g for g in self.games if g.find_config() and g.exe])
+            except Exception as exc:  # registre / powercfg indisponible
+                items = []
+                status.config(text=f"Lecture impossible : {exc}", fg="#ff6b6b")
+            if not items and not pcopt.IS_WINDOWS:
+                status.config(text="Cette fonction n'est disponible que sous Windows.", fg="#ffb347")
+            for t in items:
+                iid = tree.insert("", "end", values=(
+                    ("✔ " if t.done else "") + t.label, t.current, t.target))
+                whys[iid] = t.why
+            todo = any(not t.done for t in items)
+            btn_apply.state(["!disabled"] if todo else ["disabled"])
+            has_backup = os.path.exists(pcopt.backup_path())
+            btn_restore.state(["!disabled"] if has_backup else ["disabled"])
+            if items and not todo:
+                status.config(text="Tout est déjà appliqué.", fg="#5ee38b")
+
+        def do_apply():
+            try:
+                done = pcopt.apply([g for g in self.games if g.find_config() and g.exe])
+            except Exception as exc:
+                messagebox.showerror("OpenFPS", f"Impossible d'appliquer : {exc}", parent=win)
+                return
+            refresh()
+            status.config(text=f"{len(done)} réglage(s) appliqué(s). Sauvegarde créée.", fg="#5ee38b")
+
+        def do_restore():
+            try:
+                n = pcopt.restore()
+            except Exception as exc:
+                messagebox.showerror("OpenFPS", f"Restauration impossible : {exc}", parent=win)
+                return
+            refresh()
+            status.config(text=f"{n} réglage(s) restauré(s).", fg="#5ee38b")
+
+        btn_apply.configure(command=do_apply)
+        btn_restore.configure(command=do_restore)
+        refresh()
+        win.update_idletasks()
+        w, h = max(720, win.winfo_reqwidth()), win.winfo_reqheight() + 20
+        x = self.winfo_rootx() + max(0, (self.winfo_width() - w) // 2)
+        y = self.winfo_rooty() + 40
+        win.geometry(f"{w}x{h}+{x}+{y}")
 
     # -------------------------------------------------------------------- fiche
     def _open_detail(self, g):
