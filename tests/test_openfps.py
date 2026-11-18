@@ -311,3 +311,19 @@ class PcOptTest(unittest.TestCase):
                          "~ RUNASADMIN DISABLEDXMAXIMIZEDWINDOWEDMODE")
         already = "~ DISABLEDXMAXIMIZEDWINDOWEDMODE"
         self.assertEqual(pcopt.add_layer_flag(already), already)
+
+
+class LookupTest(unittest.TestCase):
+    def test_exact_match_only(self):
+        import io, json, os, tempfile
+        from unittest import mock
+        from openfps import covers
+        payload = json.dumps({"items": [{"id": 1, "name": "Hades II"}, {"id": 2, "name": "Hades"}]}).encode()
+        class R(io.BytesIO):
+            def __enter__(self): return self
+            def __exit__(self, *a): pass
+        with tempfile.TemporaryDirectory() as tmp, \
+             mock.patch.dict(os.environ, {"APPDATA": tmp}), \
+             mock.patch("urllib.request.urlopen", lambda *a, **k: R(payload)):
+            self.assertEqual(covers.lookup_appid("Hades"), 2)
+            self.assertIsNone(covers.lookup_appid("Hade"))

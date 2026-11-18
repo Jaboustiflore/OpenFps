@@ -12,6 +12,7 @@ from __future__ import annotations
 import colorsys
 import glob
 import hashlib
+import json
 import os
 import re
 import urllib.request
@@ -84,6 +85,47 @@ def find_cover(game):
         if os.path.isfile(cached):
             return cached
     return None
+
+
+def _norm(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", (text or "").lower())
+
+
+def _appid_cache_path() -> str:
+    return os.path.join(os.path.dirname(user_covers_dir()), "appids.json")
+
+
+def lookup_appid(name: str):
+    """Retrouve l'appid Steam d'un jeu par son nom (correspondance EXACTE seulement,
+    pour ne jamais afficher la jaquette d'un autre jeu). Résultat mis en cache."""
+    key = _norm(name)
+    if len(key) < 3:
+        return None
+    try:
+        with open(_appid_cache_path(), encoding="utf-8") as f:
+            cache = json.load(f)
+    except (OSError, ValueError):
+        cache = {}
+    if key in cache:
+        return cache[key] or None
+    try:
+        import urllib.parse
+        url = ("https://store.steampowered.com/api/storesearch/?cc=fr&l=french&term="
+               + urllib.parse.quote(name))
+        req = urllib.request.Request(url, headers={"User-Agent": "OpenFPS"})
+        with urllib.request.urlopen(req, timeout=10) as r:
+            items = json.loads(r.read().decode("utf-8")).get("items", [])
+    except Exception:
+        return None  # réseau indisponible : on réessaiera plus tard (pas de cache)
+    found = next((int(i["id"]) for i in items if _norm(i.get("name")) == key), 0)
+    cache[key] = found
+    try:
+        os.makedirs(os.path.dirname(_appid_cache_path()), exist_ok=True)
+        with open(_appid_cache_path(), "w", encoding="utf-8") as f:
+            json.dump(cache, f)
+    except OSError:
+        pass
+    return found or None
 
 
 _FAILED: set = set()

@@ -157,13 +157,17 @@ class App(tk.Tk):
         return img
 
     def _queue_download(self, g):
-        appid = getattr(g, "steam_appid", None)
-        if not appid or appid in self._requested:
+        if g.id in self._requested:
             return
-        self._requested.add(appid)
+        self._requested.add(g.id)
 
         def work():
-            if covers.download_cover(appid):
+            appid = getattr(g, "steam_appid", None)
+            if not appid:  # pas d'appid connu : recherche par nom exact dans le magasin Steam
+                appid = covers.lookup_appid(g.name.split(" (")[0])
+                if appid:
+                    g.steam_appid = appid
+            if appid and covers.download_cover(appid):
                 self.after(0, self._covers_changed)
         threading.Thread(target=work, daemon=True).start()
 
