@@ -94,6 +94,11 @@ class Change:
 
 def expand(path: str) -> str:
     """Développe %VAR%, $VAR et ~ de façon portable, et normalise les séparateurs."""
+    if "%STEAMPATH%" in path:  # dossier Steam réel (registre), pas forcément Program Files
+        from .covers import steam_roots
+        roots = steam_roots()
+        if roots:
+            path = path.replace("%STEAMPATH%", roots[0])
     path = re.sub(r"%([^%]+)%", lambda m: os.environ.get(m.group(1), m.group(0)), path)
     path = os.path.expandvars(os.path.expanduser(path))
     return path.replace("\\", os.sep) if os.sep != "\\" else path

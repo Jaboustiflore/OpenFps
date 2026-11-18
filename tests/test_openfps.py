@@ -208,3 +208,21 @@ class CoverTests(unittest.TestCase):
         from openfps import covers
         self.assertEqual(covers.tile_colors("cs2"), covers.tile_colors("cs2"))
         self.assertNotEqual(covers.tile_colors("cs2"), covers.tile_colors("apex_legends"))
+
+
+class SteamPathTests(unittest.TestCase):
+    def test_steampath_resolves_to_steam_root_on_other_drive(self):
+        from openfps import covers
+        tmp = tempfile.mkdtemp()
+        steam = os.path.join(tmp, "F", "Steam")
+        d = os.path.join(steam, "userdata", "999", "730", "local", "cfg")
+        os.makedirs(d)
+        f = os.path.join(d, "cs2_video.txt")
+        open(f, "w").write('"video.cfg"\n{\n\t"setting.msaa_samples"\t\t"8"\n}\n')
+        orig = covers.steam_roots
+        covers.steam_roots = lambda: [steam]
+        try:
+            cs2 = next(g for g in catalog.load_catalog() if g.id == "cs2")
+            self.assertEqual(cs2.find_all(), [f])
+        finally:
+            covers.steam_roots = orig

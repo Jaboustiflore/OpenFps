@@ -4,6 +4,7 @@
   "steam_appid": 730,
   "status": "experimental",
   "paths": [
+    "%STEAMPATH%\\userdata\\*\\730\\local\\cfg\\cs2_video.txt",
     "%ProgramFiles(x86)%\\Steam\\userdata\\*\\730\\local\\cfg\\cs2_video.txt"
   ],
   "separator": "vdf",
@@ -58,6 +59,6 @@
   "tips": [
     "Expérimental : Steam Cloud peut réécrire cs2_video.txt. Si les réglages reviennent, désactive Steam Cloud pour CS2 puis relance l'optimisation.",
     "Certains guides indiquent que des réglages d'ombres de ce fichier sont ignorés par le jeu : vérifie dans les options vidéo.",
-    "Si Steam est installé ailleurs que dans Program Files (x86), utilise 'Choisir le fichier...'. Ferme CS2 avant d'optimiser."
+    "Le dossier Steam est lu dans le registre Windows (même s'il est sur un autre disque). Sinon, utilise 'Choisir le fichier...'. Ferme CS2 avant d'optimiser."
   ]
 }
