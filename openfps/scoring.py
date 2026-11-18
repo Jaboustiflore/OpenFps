@@ -69,13 +69,32 @@ def ram_score(ram_gb: float) -> float:
     return clamp(ram_gb / 16 * 100, 5, 100) if ram_gb > 0 else 30.0
 
 
-def variables(hw, target_fps: int = 144) -> dict:
-    """Variables disponibles dans les formules des fichiers de jeu."""
+# profil -> (nom affiché, décalage appliqué au score GPU : plus c'est haut, plus c'est beau)
+PROFILES = {
+    "fps": ("FPS max", 0),
+    "balanced": ("Équilibré", 12),
+    "beauty": ("Beauté", 25),
+}
+PROFILE_ORDER = ("fps", "balanced", "beauty")
+
+
+def variables(hw, target_fps: int = 144, profile: str = "fps") -> dict:
+    """Variables disponibles dans les formules des fichiers de jeu.
+
+    `profile` décale le score GPU utilisé par les formules : « fps » = réglages tels
+    que calculés pour le maximum de FPS, « balanced » et « beauty » relèvent les paliers.
+    `gpu_raw` garde le score réel, `profile_level` vaut 0, 1 ou 2."""
+    if profile not in PROFILES:
+        profile = "fps"
+    shift = PROFILES[profile][1]
+    raw = round(gpu_score(hw.gpu_name, hw.vram_gb), 1)
     px = hw.screen_w * hw.screen_h
     res_ratio = px / (1920 * 1080)
     vram = hw.vram_gb if hw.vram_gb > 0 else (2.0 if hw.gpu_integrated else 4.0)
     return {
-        "gpu": round(gpu_score(hw.gpu_name, hw.vram_gb), 1),
+        "gpu": round(clamp(raw + shift, 0, 100), 1),
+        "gpu_raw": raw,
+        "profile_level": PROFILE_ORDER.index(profile),
         "cpu": round(cpu_score(hw.cpu_threads, hw.cpu_name), 1),
         "ram": round(ram_score(hw.ram_gb), 1),
         "threads": hw.cpu_threads,

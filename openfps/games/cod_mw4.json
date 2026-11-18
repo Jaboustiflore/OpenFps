@@ -36,8 +36,8 @@
     {
       "key": "TextureQuality@0",
       "label": "Textures (valeur du fichier, 0 à 3)",
-      "formula": "3 if gpu < 75 else (1 if vram_gb < 8 else 0)",
-      "why": "Moins de textures lourdes = moins de VRAM utilisée et moins de saccades de chargement sur les cartes moyennes (réglage choisi à la main par un joueur RTX 2070 et jugé plus fluide)."
+      "formula": "(3 if gpu < 75 else 1) if profile_level == 0 else ((2 if vram_gb <= 8 else 1) if profile_level == 1 else (1 if vram_gb <= 8 else 0))",
+      "why": "Les textures remplissent la VRAM : trop hautes sur une carte de 8 Go, le jeu recharge des textures en pleine partie (saccades). Le profil FPS max les met au plus bas ; Équilibré/Beauté les relèvent en gardant une marge de VRAM."
     },
     {
       "key": "ShadowQuality@0",

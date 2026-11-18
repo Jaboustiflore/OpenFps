@@ -7,7 +7,7 @@ import threading
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
-from . import __version__, catalog, covers, hardware, scoring
+from . import __version__, catalog, covers, fpstest, hardware, scoring, settings
 
 try:  # optionnel : permet d'afficher les jaquettes JPG de Steam
     from PIL import Image, ImageTk  # type: ignore
@@ -28,9 +28,13 @@ class App(tk.Tk):
         self.games = catalog.load_catalog()
         self.hw = None
         self.env = None
+        self.profile = settings.load().get("profile", "fps")
+        if self.profile not in scoring.PROFILES:
+            self.profile = "fps"
         self._images = {}  # (id, w, h) -> PhotoImage (garde une référence)
         self._cols = 0
         self._after = None
+        self._refreshers = []
         self._requested = set()  # appids dont on a déjà demandé la jaquette
         self._dl_after = None
         self._style()
@@ -71,6 +75,21 @@ class App(tk.Tk):
         self.hw_label = tk.Label(self, text="Détection de ta configuration...", bg=BG, fg=MUTED,
                                  anchor="w", justify="left", font=("Segoe UI", 9))
         self.hw_label.pack(fill="x", padx=PAD)
+
+        prof = tk.Frame(self, bg=BG)
+        prof.pack(fill="x", padx=PAD, pady=(6, 0))
+        tk.Label(prof, text="Profil :", bg=BG, fg=MUTED).pack(side="left", padx=(0, 8))
+        self._profile_var = tk.StringVar(value=self.profile)
+        for key in scoring.PROFILE_ORDER:
+            tk.Radiobutton(prof, text=scoring.PROFILES[key][0], value=key,
+                           variable=self._profile_var, indicatoron=0, bg=PANEL, fg=FG,
+                           selectcolor=ACCENT, activebackground="#444444",
+                           activeforeground=FG, relief="flat", bd=0, padx=14, pady=5,
+                           font=("Segoe UI", 10, "bold"),
+                           command=self._profile_changed).pack(side="left", padx=2)
+        self._profile_hint = tk.Label(prof, text="", bg=BG, fg=MUTED, font=("Segoe UI", 9))
+        self._profile_hint.pack(side="left", padx=12)
+        self._profile_changed(save=False)
 
         wrap = tk.Frame(self, bg=BG)
         wrap.pack(fill="both", expand=True, pady=(8, 0))
@@ -225,6 +244,27 @@ class App(tk.Tk):
             f"GPU {hw.gpu_name} (score {e['gpu']}/100)   |   CPU {hw.cpu_threads} threads "
             f"(score {e['cpu']}/100)   |   RAM {hw.ram_gb} Go   |   Écran {hw.screen_w}x{hw.screen_h}"))
 
+    def _env(self):
+        """Variables de formule pour le profil choisi (FPS max / Équilibré / Beauté)."""
+        return scoring.variables(self.hw, profile=self.profile) if self.hw else None
+
+    PROFILE_HINTS = {
+        "fps": "le maximum de FPS, graphismes réduits",
+        "balanced": "bon compromis FPS / image",
+        "beauty": "image plus belle, FPS plus modestes",
+    }
+
+    def _profile_changed(self, save=True):
+        self.profile = self._profile_var.get()
+        if save:
+            settings.save(profile=self.profile)
+        self._profile_hint.config(text=self.PROFILE_HINTS.get(self.profile, ""))
+        for fn in list(getattr(self, "_refreshers", [])):
+            try:
+                fn()
+            except tk.TclError:
+                pass
+
     # ---------------------------------------------------------------- PC (Windows)
     def _open_pc(self):
         from . import pcopt
@@ -317,6 +357,83 @@ class App(tk.Tk):
         y = self.winfo_rooty() + 40
         win.geometry(f"{w}x{h}+{x}+{y}")
 
+    # ------------------------------------------------------------------ test FPS
+    def _open_fps(self, g, parent):
+        win = tk.Toplevel(parent)
+        win.title(f"Test FPS : {g.name.split(' (')[0]}")
+        win.configure(bg=BG)
+        win.transient(parent)
+        tk.Label(win, text="Test FPS avant / après", bg=BG, fg=FG, font=("Segoe UI", 18, "bold"),
+                 anchor="w").pack(fill="x", padx=PAD, pady=(PAD, 2))
+        tk.Label(win, justify="left", anchor="w", wraplength=640, bg=BG, fg=MUTED,
+                 font=("Segoe UI", 9),
+                 text=("OpenFPS ne mesure pas les images lui-même. Enregistre une partie de quelques "
+                       "minutes avec un outil gratuit (CapFrameX, PresentMon, NVIDIA FrameView, "
+                       "MSI Afterburner), exporte le fichier CSV, puis importe-le ici : une fois "
+                       "AVANT d'optimiser, une fois APRÈS, sur la même scène du jeu.")
+                 ).pack(fill="x", padx=PAD)
+
+        bar = tk.Frame(win, bg=BG)
+        bar.pack(side="bottom", fill="x", padx=PAD, pady=PAD)
+        status = tk.Label(win, text="", bg=BG, fg="#5ee38b", anchor="w", wraplength=640,
+                          justify="left")
+        status.pack(side="bottom", fill="x", padx=PAD)
+
+        cols = ("Mesure", "Avant", "Après", "Évolution")
+        tree = ttk.Treeview(win, columns=cols, show="headings", height=6)
+        for col, wd in zip(cols, (200, 120, 120, 150)):
+            tree.heading(col, text=col)
+            tree.column(col, width=wd)
+        tree.pack(fill="both", expand=True, padx=PAD, pady=10)
+
+        def refresh():
+            tree.delete(*tree.get_children())
+            b, a = fpstest.get_result(g.id, "before"), fpstest.get_result(g.id, "after")
+            diff = fpstest.compare(b, a) if (b and a) else {}
+
+            def row(label, key, fmt, better_low=False):
+                bv = fmt(getattr(b, key)) if b else "-"
+                av = fmt(getattr(a, key)) if a else "-"
+                if key in diff:
+                    d = diff[key]
+                    ev = f"{d:+.1f} %"
+                else:
+                    ev = ""
+                tree.insert("", "end", values=(label, bv, av, ev))
+            row("FPS moyen", "fps_avg", lambda v: f"{v:.1f}")
+            row("1 % bas (fluidité)", "fps_1_low", lambda v: f"{v:.1f}")
+            row("0,1 % bas", "fps_01_low", lambda v: f"{v:.1f}")
+            tree.insert("", "end", values=(
+                "Saccades (images > 2,5x la médiane)",
+                b.stutters if b else "-", a.stutters if a else "-",
+                f"{diff['stutters']:+d}" if diff else ""))
+            row("Durée (s)", "duration_s", lambda v: f"{v:.0f}")
+
+        def do_import(slot):
+            path = filedialog.askopenfilename(
+                parent=win, title="Enregistrement de temps d'image (CSV)",
+                filetypes=[("CSV", "*.csv"), ("Tous les fichiers", "*.*")])
+            if not path:
+                return
+            try:
+                st = fpstest.stats(fpstest.read_frametimes(path), label=os.path.basename(path))
+                fpstest.save_result(g.id, slot, st)
+            except (OSError, ValueError) as exc:
+                messagebox.showerror("OpenFPS", f"Fichier non utilisable : {exc}", parent=win)
+                return
+            refresh()
+            status.config(text=f"{os.path.basename(path)} : {st.fps_avg} FPS en moyenne "
+                               f"({st.frames} images).", fg="#5ee38b")
+
+        ttk.Button(bar, text="Importer « Avant »", style="Plain.TButton",
+                   command=lambda: do_import("before")).pack(side="left")
+        ttk.Button(bar, text="Importer « Après »", style="Accent.TButton",
+                   command=lambda: do_import("after")).pack(side="left", padx=6)
+        refresh()
+        win.update_idletasks()
+        win.geometry(f"{max(700, win.winfo_reqwidth())}x{win.winfo_reqheight() + 10}"
+                     f"+{parent.winfo_rootx() + 40}+{parent.winfo_rooty() + 40}")
+
     # -------------------------------------------------------------------- fiche
     def _open_detail(self, g):
         win = tk.Toplevel(self)
@@ -381,6 +498,8 @@ class App(tk.Tk):
         btn_opt.pack(side="left")
         btn_res.pack(side="left", padx=6)
         btn_browse.pack(side="left")
+        ttk.Button(bar, text="Test FPS...", style="Plain.TButton",
+                   command=lambda: self._open_fps(g, win)).pack(side="left", padx=6)
 
         state = {"running": False}
 
@@ -412,10 +531,10 @@ class App(tk.Tk):
                 tips.config(text="Détection de ta configuration en cours...")
                 win.after(800, refresh)
                 return
-            tips.config(text="\n".join(catalog.render_tips(g, self.env)))
+            tips.config(text="\n".join(catalog.render_tips(g, self._env())))
             if path:
                 try:
-                    for ch in catalog.plan(g, path, self.env):
+                    for ch in catalog.plan(g, path, self._env()):
                         iid = tree.insert("", "end", values=(ch.label, ch.old, ch.new))
                         why_map[iid] = ch.why
                 except OSError as exc:
@@ -429,8 +548,8 @@ class App(tk.Tk):
 
         def optimize():
             try:
-                changes = (catalog.apply(g, g.custom_path, self.env) if g.custom_path
-                           else catalog.apply_all(g, self.env))
+                changes = (catalog.apply(g, g.custom_path, self._env()) if g.custom_path
+                           else catalog.apply_all(g, self._env()))
             except OSError as exc:
                 messagebox.showerror("OpenFPS", f"Écriture impossible : {exc}", parent=win)
                 return
@@ -456,6 +575,9 @@ class App(tk.Tk):
         refresh()
 
         # dimensionne la fenêtre selon son contenu pour que les boutons ne soient jamais coupés
+        self._refreshers.append(refresh)
+        win.bind("<Destroy>", lambda e: self._refreshers.remove(refresh)
+                 if e.widget is win and refresh in self._refreshers else None)
         if g.process:
             win.after(2000, watch)
         win.update_idletasks()

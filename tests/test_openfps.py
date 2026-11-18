@@ -1,3 +1,4 @@
+import statistics
 import os
 import sys
 import tempfile
@@ -327,3 +328,56 @@ class LookupTest(unittest.TestCase):
              mock.patch("urllib.request.urlopen", lambda *a, **k: R(payload)):
             self.assertEqual(covers.lookup_appid("Hades"), 2)
             self.assertIsNone(covers.lookup_appid("Hade"))
+
+
+class ProfilesAndFpsTest(unittest.TestCase):
+    def _hw(self):
+        class H:
+            gpu_name = "NVIDIA GeForce RTX 2070"; vram_gb = 8; cpu_threads = 6; cpu_name = ""
+            ram_gb = 16; screen_w = 1920; screen_h = 1080; gpu_integrated = False
+        return H()
+
+    def test_profiles_shift_gpu_score(self):
+        from openfps import scoring
+        a = scoring.variables(self._hw(), profile="fps")
+        b = scoring.variables(self._hw(), profile="balanced")
+        c = scoring.variables(self._hw(), profile="beauty")
+        self.assertEqual((a["profile_level"], b["profile_level"], c["profile_level"]), (0, 1, 2))
+        self.assertEqual(b["gpu"], a["gpu"] + 12)
+        self.assertEqual(c["gpu_raw"], a["gpu"])
+        self.assertEqual(scoring.variables(self._hw(), profile="nimportequoi")["profile_level"], 0)
+
+    def test_mw4_textures_follow_profile(self):
+        from openfps import catalog, scoring
+        from openfps.formula import evaluate
+        g = [x for x in catalog.load_catalog() if x.id == "cod_mw4"][0]
+        tex = next(s for s in g.settings if s.key == "TextureQuality@0")
+        vals = [evaluate(tex.formula, scoring.variables(self._hw(), profile=p))
+                for p in scoring.PROFILE_ORDER]
+        self.assertEqual(vals, [3, 2, 1])
+
+    def test_fps_stats_and_csv(self):
+        import os, tempfile
+        from openfps import fpstest
+        fts = [10.0] * 990 + [40.0] * 10  # 100 FPS avec 10 grosses saccades
+        st = fpstest.stats(fts)
+        self.assertEqual(st.stutters, 10)
+        self.assertAlmostEqual(st.fps_avg, 1000 / (sum(fts) / len(fts)), 1)
+        self.assertAlmostEqual(st.fps_1_low, 25.0, 1)
+        with tempfile.TemporaryDirectory() as tmp:
+            p = os.path.join(tmp, "a.csv")
+            with open(p, "w") as f:
+                f.write("Application,MsBetweenPresents\n" + "\n".join(f"x.exe,{v}" for v in fts))
+            self.assertEqual(len(fpstest.read_frametimes(p)), 1000)
+            p2 = os.path.join(tmp, "b.csv")  # horodatage cumulé, séparateur ; et virgule décimale
+            with open(p2, "w") as f:
+                f.write("TimeInSeconds;x\n" + "\n".join(f"{i * 0.01:.2f}".replace(".", ",") + ";0" for i in range(100)))
+            self.assertAlmostEqual(statistics.mean(fpstest.read_frametimes(p2)), 10.0, 1)
+            with self.assertRaises(ValueError):
+                open(os.path.join(tmp, "c.csv"), "w").write("a,b\n1,2\n")
+                fpstest.read_frametimes(os.path.join(tmp, "c.csv"))
+
+    def test_compare(self):
+        from openfps import fpstest
+        a = fpstest.stats([20.0] * 200); b = fpstest.stats([10.0] * 200)
+        self.assertEqual(fpstest.compare(a, b)["fps_avg"], 100.0)
