@@ -1,27 +1,15 @@
 @echo off
 cd /d "%~dp0"
-where python >nul 2>&1
-if %errorlevel%==0 (
-    python -c "import PIL" >nul 2>&1
-    if errorlevel 1 python -m pip install --quiet --user pillow
+echo [%date% %time%] demarrage > openfps_log.txt
+where python >> openfps_log.txt 2>&1
+python --version >> openfps_log.txt 2>&1
+python -c "import tkinter, sys; print(tkinter ok, sys.version)" >> openfps_log.txt 2>&1
+python -c "import PIL; print(pillow ok)" >> openfps_log.txt 2>&1
+if errorlevel 1 python -m pip install --quiet --user pillow >> openfps_log.txt 2>&1
+python run_openfps.py >> openfps_log.txt 2>&1
+if errorlevel 1 (
+    echo.
+    echo Une erreur est survenue. Detail dans openfps_log.txt :
+    type openfps_log.txt
+    pause
 )
-where pythonw >nul 2>&1
-if %errorlevel%==0 (
-    start "" pythonw run_openfps.py
-    exit /b
-)
-where py >nul 2>&1
-if %errorlevel%==0 (
-    start "" pyw -3 run_openfps.py
-    exit /b
-)
-where python >nul 2>&1
-if %errorlevel%==0 (
-    python run_openfps.py
-    if errorlevel 1 pause
-    exit /b
-)
-echo Python nest pas installe.
-echo Installe-le depuis le Microsoft Store (cherche "Python 3.13"),
-echo puis relance ce fichier.
-pause

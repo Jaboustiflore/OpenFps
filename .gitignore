@@ -4,3 +4,4 @@ build/
 dist/
 *.spec
 *.openfps.bak
+openfps_log.txt
