@@ -84,6 +84,12 @@ class App(tk.Tk):
         self._render()
 
     def _on_wheel(self, e):
+        # ne fait défiler le catalogue que si la molette est sur la fenêtre principale
+        try:
+            if e.widget.winfo_toplevel() is not self:
+                return
+        except (tk.TclError, KeyError, AttributeError):
+            return
         self.canvas.yview_scroll(int(-e.delta / 120), "units")
 
     def _on_resize(self, e):
@@ -191,8 +197,13 @@ class App(tk.Tk):
         win = tk.Toplevel(self)
         win.title(g.name)
         win.configure(bg=BG)
-        win.geometry("820x520")
+        w, h = 900, 640
+        x = self.winfo_rootx() + max(0, (self.winfo_width() - w) // 2)
+        y = self.winfo_rooty() + max(0, (self.winfo_height() - h) // 2)
+        win.geometry(f"{w}x{h}+{x}+{y}")
+        win.minsize(760, 520)
         win.transient(self)
+        win.focus_set()
 
         left = tk.Frame(win, bg=BG)
         left.pack(side="left", padx=PAD, pady=PAD, anchor="n")
@@ -209,11 +220,16 @@ class App(tk.Tk):
         path_lbl.pack(fill="x", pady=(2, 8))
 
         cols = ("Réglage", "Actuel", "Nouveau")
-        tree = ttk.Treeview(right, columns=cols, show="headings", height=9)
-        for col, wd in zip(cols, (270, 100, 100)):
+        tree_box = tk.Frame(right, bg=BG)
+        tree_box.pack(fill="both", expand=True)
+        tree = ttk.Treeview(tree_box, columns=cols, show="headings", height=14)
+        for col, wd in zip(cols, (270, 110, 110)):
             tree.heading(col, text=col)
             tree.column(col, width=wd)
-        tree.pack(fill="both", expand=True)
+        vsb = ttk.Scrollbar(tree_box, orient="vertical", command=tree.yview)
+        tree.configure(yscrollcommand=vsb.set)
+        vsb.pack(side="right", fill="y")
+        tree.pack(side="left", fill="both", expand=True)
 
         tips = tk.Label(right, text="", bg=BG, fg=MUTED, anchor="w", wraplength=500,
                         justify="left", font=("Segoe UI", 9))
